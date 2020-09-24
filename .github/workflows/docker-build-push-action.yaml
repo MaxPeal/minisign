@@ -38,14 +38,15 @@ jobs:
         #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
         run: |
          echo "::set-env name=REPOSITORY_LOWER_TAG::$(echo $GITHUB_REPOSITORY/ci | tr [:upper:] [:lower:])"
-         echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER_TAG}}"
+         echo "REPOSITORY_LOWER_TAG ${{env.REPOSITORY_LOWER_TAG}}"
       -
         name: Prepare
         id: prep
         run: |
           #DOCKER_IMAGE=name/app
           #DOCKER_IMAGE=maxpeal/minisign-ci
-          DOCKER_IMAGE=${{ github.repository_owner }}/${{ github.event.repository.name }}
+          #DOCKER_IMAGE=${{ github.repository_owner }}/${{ github.event.repository.name }}
+          DOCKER_IMAGE=${{env.REPOSITORY_LOWER}}/ci
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
