@@ -1,0 +1,5 @@
+FROM tonistiigi/debian:riscv
+RUN echo "hello world form tonistiigi/debian:riscv"
+RUN uname -a
+RUN uname -m
+RUN getconf -a

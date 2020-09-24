@@ -1,17 +1,33 @@
-FROM alpine:latest as build
+#FROM tonistiigi/debian
+FROM tonistiigi/debian:riscv as build
+
+##FROM alpine:latest as build
 
 WORKDIR /usr/src/minisign
-RUN apk add --no-cache build-base cmake curl pkgconfig
-RUN apk add --no-cache upx ||:
-RUN apk add --no-cache gnupg1 wget outils-signify busybox-static
+
+RUN uname -a && lsb_release -a || grep -v /etc/*release /etc/*version /etc/os-* ||: 
+#grep -v "/etc/*release|/etc/*version|/etc/os*" ||:
+RUN apt -y update && apt -y upgrade 
+RUN command -v pkg-config ||:
+RUN apt-get -y install --reinstall pkg-config cmake-data
+RUN apt -y install build-essential wget cmake curl upx-ucl libpkgconfig-perl
+RUN apt -y install gpgv1 gnupg1 signify-openbsd busybox-static
+#RUN apt -y install gpgv-static
+RUN command -v pkg-config ||:
+RUN ls -altr /usr/bin/pkg-config
+
+#RUN apk add --no-cache build-base cmake curl pkgconfig
+#RUN apk add --no-cache upx ||:
+
 RUN curl https://download.libsodium.org/libsodium/releases/LATEST.tar.gz | tar xzvf - 
+
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" ./configure --disable-dependency-tracking 
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j$(nproc) check 
-#RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j"$CPUS" check 
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make install 
 RUN rm -fr libsodium-stable
 #&& cd .. && rm -fr libsodium-stable
 
+# copy the source form git checkout to workdir
 COPY ./ ./
 RUN mkdir build && cd build && cmake -D BUILD_STATIC_EXECUTABLES=1 .. && make -j$(nproc)
 RUN upx --lzma build/minisign ||:
