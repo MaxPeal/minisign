@@ -48,9 +48,18 @@ IMAGE_NAME=${IMAGE_NAME:="${DOCKER_REPO}:${DOCKER_TAG}"}
 #    }
 
 #HFILE=buildx HASHcmd=sha256sum HASHSUM=3f4e77686659766a0726b5a47a87e2cc14c86ebf15abf7f19c45d23b0daff222 HURL=https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
-HFILE=buildx HASHcmd=sha256sum HASHSUM=c21f07356de93a4fa5d1b7998252ea5f518dbe94ae781e0edeec7d7e29fdf899 HURL=https://github.com/docker/buildx/releases/download/v0.4.2/buildx-v0.4.2.linux-amd64
-printf "HFILE=$HFILE HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
-curl -o $HFILE -LR -C- -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+HFILE=docker-buildx HDIR=~/.docker/cli-plugins HASHcmd=sha256sum HASHSUM=c21f07356de93a4fa5d1b7998252ea5f518dbe94ae781e0edeec7d7e29fdf899 HURL=https://github.com/docker/buildx/releases/download/v0.4.2/buildx-v0.4.2.linux-amd64
+printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
+####THFILE=$(mktemp || tempfile) || exit && trap "rm -f -- '$THFILE'" EXIT
+####((cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o ${THFILE} -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+####mkdir -p "${HDIR}"
+####mv "${THFILE}" "${HDIR}"/"${HFILE}"
+####chmod 755 "${HDIR}"/"${HFILE}"
+
+((cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+mkdir -p "${HDIR}"
+mv "${HFILE}" "${HDIR}"/"${HFILE}"
+chmod 755 "${HDIR}"/"${HFILE}"
 
 #curl -o $HFILE -LR -C- -# -f -S --connect-timeout 15 --max-time 600 --retry 3 --retry-connrefused --dump-header --verbose https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
 # curl: option --retry-connrefused: is unknown
@@ -60,9 +69,9 @@ curl -o $HFILE -LR -C- -f -S --connect-timeout 15 --max-time 600 --retry 3 --dum
 #curl -o $HFILE -# -f -S -L --connect-timeout 15 -m 20 --retry 3 --head https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
 #HFILE=buildx HASHcmd=sha256sum HASHSUM=3f4e77686659766a0726b5a47a87e2cc14c86ebf15abf7f19c45d23b0daff222 ; (printf %b $HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || $HASHcmd -b $HFILE
 
-mkdir -p ~/.docker/cli-plugins
-mv $HFILE ~/.docker/cli-plugins/docker-buildx
-chmod 755 ~/.docker/cli-plugins/docker-buildx
+#mkdir -p ~/.docker/cli-plugins
+#mv $HFILE ~/.docker/cli-plugins/docker-buildx
+#chmod 755 ~/.docker/cli-plugins/docker-buildx
 
 #docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 ##docker build --no-cache --progress=plain
@@ -72,8 +81,8 @@ chmod 755 ~/.docker/cli-plugins/docker-buildx
 #docker buildx ls
 
   # Instantiate docker buildx builder with multi-architecture support.
-  export DOCKER_BUILDKIT=1
-  export DOCKER_CLI_EXPERIMENTAL=enabled
+##  export DOCKER_BUILDKIT=1
+##  export DOCKER_CLI_EXPERIMENTAL=enabled
   docker -v
   docker --help || docker -h
   docker version
@@ -84,7 +93,7 @@ chmod 755 ~/.docker/cli-plugins/docker-buildx
    docker buildx rm $line
   done
   
-  docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  ### docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
@@ -99,6 +108,7 @@ chmod 755 ~/.docker/cli-plugins/docker-buildx
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
 
+if [ "$DEBUG2" = "true" ]; then;
 #####
 cat > Dockerfile.busybox -<<EOF
 FROM busybox
@@ -151,7 +161,9 @@ EOF
 
 #docker buildx build --platform $(docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]") --tag testbox --progress plain 
 cat Dockerfile.busybox | docker buildx build $progressFlag --platform linux/amd64 --tag testbox -
+fi
 
+if [ "$DEBUG3" = "true" ]; then;
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2  | tr "," "\\n" | grep -v linux/amd64 | \
   while read line; do
    #docker buildx rm $line
@@ -164,6 +176,7 @@ docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2  | tr "," 
    #|| true
   done
 #####
+fi
 
 #docker buildx build --platform $(docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]") --tag testbox --progress plain -<<EOF
 #FROM busybox
@@ -184,7 +197,7 @@ docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2  | tr "," 
 ####EOF
 
 
-
+if [ "$DEBUG4" != "true" ]; then;
 #iidfile=$(mktemp -t docker-iidfile.XXXXXXXXXX)
 #DOCKER_BUILDKIT=1 docker build --iidfile $iidfile --progress=plain .
 #docker run -it --rm $(cat $iidfile)
@@ -219,3 +232,4 @@ fi
   # #|| true
 done
 #####
+fi
