@@ -14,6 +14,26 @@ set -vx
 ###DockerServerVersion=$(docker info --format '{{.ServerVersion}}')
 ###DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
 
+echo "docker --version"
+docker --version
+echo "docker version"
+docker version
+echo "uname -r"
+uname -r
+uname -a
+echo "ls -altr /proc/sys/fs/binfmt_misc"
+ls -latr /proc/sys/fs/binfmt_misc
+command -v update-binfmts
+# sudo apt-get install binfmt-support
+ls -latr /proc/sys/fs/binfmt_misc/qemu-aarch64
+ls -latr /usr/bin/qemu-aarch64-static
+grep 'flags:' /proc/sys/fs/binfmt_misc/qemu-aarch64
+
+export DOCKER_CLI_EXPERIMENTAL=enabled
+#sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+#sudo apt-get install qemu-user-static
+
+
 echo "##################################################"
 #set
 #env
