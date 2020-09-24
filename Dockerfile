@@ -1,7 +1,8 @@
 FROM alpine:latest as build
 
 WORKDIR /usr/src/minisign
-ARG CPUS:$(-nproc)
+#ARG CPUS:$(-nproc)
+ARG CPUS=1
 RUN apk add --no-cache build-base cmake curl pkgconfig
 RUN apk add --no-cache upx ||:
 RUN curl https://download.libsodium.org/libsodium/releases/LATEST.tar.gz | tar xzvf - 
