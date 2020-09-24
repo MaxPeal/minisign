@@ -2,22 +2,34 @@
 set -vx
 
 ###export QUICKBUILD=true
-export CONTINUOUS_INTEGRATION=true
+###export CONTINUOUS_INTEGRATION=true
 
 # see https://github.com/tonistiigi/binfmt/blob/89246f9e498eb6cf6fbaa741845309f07c42a042/hack/validate-vendor
-: "${CONTINUOUS_INTEGRATION=}"
-progressFlag=""
-if [ "$CONTINUOUS_INTEGRATION" = "true" ]; then progressFlag="--progress=plain"; fi
+####: "${CONTINUOUS_INTEGRATION=}"
+####progressFlag=""
+###if [ "$CONTINUOUS_INTEGRATION" = "true" ]; then progressFlag="--progress=plain"; fi
 
 #NODE_VERSION=$(echo $DOCKER_TAG | cut -d "-" -f2)
-QEMUVER=$(echo "$DOCKER_TAG")
-DockerServerVersion=$(docker info --format '{{.ServerVersion}}')
-DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
+###QEMUVER=$(echo "$DOCKER_TAG")
+###DockerServerVersion=$(docker info --format '{{.ServerVersion}}')
+###DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
 
 echo "##################################################"
-set
-env
+#set
+#env
 echo "##################################################"
+echo "##################################################""##################################################""##################################################""##################################################"
+curl -SL https://gist.github.com/MaxPeal/43537c45b148e8a75af87cd4233e513a/raw/80496a3d931023ad72ca3368b9e77a81f80fc775/check-qemu-binfmt.sh | bash -s
+echo "##################################################""##################################################""##################################################""##################################################"
+
+echo "##################################################""##################################################""##################################################""##################################################"
+curl -SL https://gist.github.com/MaxPeal/790ceecece5f6e6c68d0ed647b5c51d3/raw/d53ed4e5bef6b62ba258a79f2984b9a3a7d78265/multi-arch-docker-ci.sh | bash -s
+echo "##################################################""##################################################""##################################################""##################################################"
+
+echo "##################################################""##################################################""##################################################""##################################################"
+##curl -SL https://gist.github.com/MaxPeal/53216500768d29c37f6fc84ff68f916e/raw/eddd834659bc6893a37d865d3cc2df8ca2192d7c/reregister-qemu-binfmt.sh | bash -s
+echo "##################################################""##################################################""##################################################""##################################################"
+
 
 
 # https://stackoverflow.com/questions/2013547/assigning-default-values-to-shell-variables-with-a-single-command-in-bash
@@ -65,10 +77,10 @@ printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
 ####mv "${THFILE}" "${HDIR}"/"${HFILE}"
 ####chmod 755 "${HDIR}"/"${HFILE}"
 
-( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
-mkdir -p "${HDIR}"
-mv "${HFILE}" "${HDIR}"/"${HFILE}"
-chmod 755 "${HDIR}"/"${HFILE}"
+#+#( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+#+#mkdir -p "${HDIR}"
+#+#mv "${HFILE}" "${HDIR}"/"${HFILE}"
+#+#chmod 755 "${HDIR}"/"${HFILE}"
 
 #curl -o $HFILE -LR -C- -# -f -S --connect-timeout 15 --max-time 600 --retry 3 --retry-connrefused --dump-header --verbose https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
 # curl: option --retry-connrefused: is unknown
@@ -98,24 +110,24 @@ if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
   docker version
   docker info
   
-  docker buildx ls | cut -d" " -f1 | grep -v "/" | \
-  while read -r line; do
-   docker buildx rm $line
-  done
+ #+# docker buildx ls | cut -d" " -f1 | grep -v "/" | \
+ #+# while read -r line; do
+ #+#  docker buildx rm $line
+ #+# done
   
   ### docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
-  docker buildx create --name mybuilder --driver docker-container --use
-  docker buildx use mybuilder
+ #+# docker buildx create --name mybuilder --driver docker-container --use
+ #+# docker buildx use mybuilder
   # Start up buildx and verify that all is OK.
   # duble as it needs some times duble exec
-  docker buildx inspect --bootstrap
-  docker buildx inspect --bootstrap
+ #+# docker buildx inspect --bootstrap
+ #+# docker buildx inspect --bootstrap
 
 #docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
-docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
+#+#docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
 
 if [ "$DEBUG2" = "true" ]; then
@@ -206,6 +218,8 @@ fi
 ####RUN getconf -a
 ####EOF
 
+#DEBUG4=true
+QUICKBUILD=true
 
 if [ "$DEBUG4" != "true" ]; then
 #iidfile=$(mktemp -t docker-iidfile.XXXXXXXXXX)
