@@ -6,8 +6,11 @@ RUN apk add --no-cache build-base cmake curl pkgconfig
 RUN apk add --no-cache upx ||:
 RUN curl https://download.libsodium.org/libsodium/releases/LATEST.tar.gz | tar xzvf - 
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" ./configure --disable-dependency-tracking 
-RUN make -j$(nproc) check 
-RUN make install && cd .. && rm -fr libsodium-stable
+#RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j$(nproc) check 
+RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j$(nproc) check 
+RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make install 
+RUN rm -fr libsodium-stable
+#&& cd .. && rm -fr libsodium-stable
 
 COPY ./ ./
 RUN mkdir build && cd build && cmake -D BUILD_STATIC_EXECUTABLES=1 .. && make -j$(nproc)
