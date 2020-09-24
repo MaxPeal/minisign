@@ -11,6 +11,14 @@ QEMUVER=$(echo $DOCKER_TAG)
 DockerServerVersion=$(docker info --format '{{.ServerVersion}}')
 DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
 
+# https://stackoverflow.com/questions/2013547/assigning-default-values-to-shell-variables-with-a-single-command-in-bash
+# FOO=${VARIABLE:-default}  # If variable not set or null, use default.
+# Or, which will assign default to VARIABLE as well:
+# FOO=${VARIABLE:=default}  # If variable not set or null, set it to default.
+DOCKER_REPO=${DOCKER_REPO:=local}
+DOCKER_TAG=${DOCKER_TAG:=latest}
+IMAGE_NAME=${IMAGE_NAME:="${DOCKER_REPO}:${DOCKER_TAG}"}
+
 #https://stackoverflow.com/questions/60080264/docker-cannot-build-multi-platform-images-with-docker-buildx
 #https://github.com/docker/buildx#installing
 ###export DOCKER_BUILDKIT=1
