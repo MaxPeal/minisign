@@ -7,13 +7,28 @@ jobs:
   build-secure-and-push:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-
-    - run: docker build . -t excavator:${{ github.sha }}
+      - uses: actions/checkout@master
+      - name: Set env GITHUB_SHA_7
+        #https://github.community/t/add-short-sha-to-github-context/16418
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=GITHUB_SHA_7::$(echo ${GITHUB_SHA} | cut -c1-8)"
+         echo "GITHUB_SHA_7 ${{env.GITHUB_SHA_7}}"
+      - name: Set env REPOSITORY_LOWER
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+         echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER}}"
+      - name: Set env REPOSITORY_LOWER_TAG
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=REPOSITORY_LOWER_TAG::$(echo $GITHUB_REPOSITORY/ci | tr [:upper:] [:lower:])"
+         echo "REPOSITORY_LOWER_TAG ${{env.REPOSITORY_LOWER_TAG}}"
+      - run: docker build . -t ${{ github.event.repository.name }}:${{ github.sha }}
       
-    - uses: Azure/container-scan@v0
-      with:
-        image-name: excavator:${{ github.sha }}
-        severity-threshold: UNKNOWN
-        run-quality-checks: true
+      - uses: Azure/container-scan@v0
+        with:
+          image-name: ${{ github.event.repository.name }}:${{ github.sha }}
+          severity-threshold: UNKNOWN
+          run-quality-checks: true
 # This is a basic workflow to help you get started with Actions
