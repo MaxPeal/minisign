@@ -1,8 +1,12 @@
 #!/bin/bash
 set -vx
-
+export DEBUG=true
+#bbexport DEBUG2=true
+#export DEBUG3=true
+#export DEBUG4=true
+#export DEBUG5=true
 ###export QUICKBUILD=true
-###export CONTINUOUS_INTEGRATION=true
+export CONTINUOUS_INTEGRATION=true
 
 # see https://github.com/tonistiigi/binfmt/blob/89246f9e498eb6cf6fbaa741845309f07c42a042/hack/validate-vendor
 ####: "${CONTINUOUS_INTEGRATION=}"
@@ -46,8 +50,8 @@ curl -SLOR https://gist.github.com/MaxPeal/43537c45b148e8a75af87cd4233e513a/raw/
 curl -SLOR https://gist.github.com/MaxPeal/790ceecece5f6e6c68d0ed647b5c51d3/raw/d53ed4e5bef6b62ba258a79f2984b9a3a7d78265/multi-arch-docker-ci.sh
 curl -SLOR https://gist.github.com/MaxPeal/53216500768d29c37f6fc84ff68f916e/raw/eddd834659bc6893a37d865d3cc2df8ca2192d7c/reregister-qemu-binfmt.sh
 chmod 755 *.sh
-./reregister-qemu-binfmt.sh
-./multi-arch-docker-ci.sh
+#+# ./reregister-qemu-binfmt.sh
+#+# ./multi-arch-docker-ci.sh
 ./check-qemu-binfmt.sh
 echo "##################################################""##################################################""##################################################""##################################################"
 
@@ -96,6 +100,7 @@ echo "##################################################""######################
 #    }
 
 #HFILE=buildx HASHcmd=sha256sum HASHSUM=3f4e77686659766a0726b5a47a87e2cc14c86ebf15abf7f19c45d23b0daff222 HURL=https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
+#HFILE=docker-buildx HDIR=~/.docker/cli-plugins HASHcmd=sha256sum HASHSUM=3f4e77686659766a0726b5a47a87e2cc14c86ebf15abf7f19c45d23b0daff222 HURL=https://github.com/docker/buildx/releases/download/v0.4.2/buildx-v0.4.1.linux-amd64
 HFILE=docker-buildx HDIR=~/.docker/cli-plugins HASHcmd=sha256sum HASHSUM=c21f07356de93a4fa5d1b7998252ea5f518dbe94ae781e0edeec7d7e29fdf899 HURL=https://github.com/docker/buildx/releases/download/v0.4.2/buildx-v0.4.2.linux-amd64
 printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
 ####THFILE=$(mktemp || tempfile) || exit && trap "rm -f -- '$THFILE'" EXIT
@@ -104,10 +109,11 @@ printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
 ####mv "${THFILE}" "${HDIR}"/"${HFILE}"
 ####chmod 755 "${HDIR}"/"${HFILE}"
 
-#+#( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
-#+#mkdir -p "${HDIR}"
-#+#mv "${HFILE}" "${HDIR}"/"${HFILE}"
-#+#chmod 755 "${HDIR}"/"${HFILE}"
+( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+mkdir -p "${HDIR}"
+mv "${HFILE}" "${HDIR}"/"${HFILE}"
+chmod 755 "${HDIR}"/"${HFILE}"
+chmod a+x ~/.docker/cli-plugins/docker-buildx
 
 #curl -o $HFILE -LR -C- -# -f -S --connect-timeout 15 --max-time 600 --retry 3 --retry-connrefused --dump-header --verbose https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
 # curl: option --retry-connrefused: is unknown
@@ -129,32 +135,34 @@ printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
 #docker buildx ls
 
   # Instantiate docker buildx builder with multi-architecture support.
-##  export DOCKER_BUILDKIT=1
-##  export DOCKER_CLI_EXPERIMENTAL=enabled
+export DOCKER_BUILDKIT=1
+export DOCKER_CLI_EXPERIMENTAL=enabled
   docker -v
 if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
   docker --help || docker -h
   docker version
   docker info
-  
- #+# docker buildx ls | cut -d" " -f1 | grep -v "/" | \
- #+# while read -r line; do
- #+#  docker buildx rm $line
- #+# done
+ 
+ docker buildx ls
+ docker buildx ls | cut -d" " -f1 | grep -v "/" | \
+ while read -r line; do
+   docker buildx rm $line
+ done
   
   ### docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
- #+# docker buildx create --name mybuilder --driver docker-container --use
- #+# docker buildx use mybuilder
+ #FIXME
+ docker buildx create --name mybuilder --driver docker-container --use
+ docker buildx use mybuilder
   # Start up buildx and verify that all is OK.
   # duble as it needs some times duble exec
- #+# docker buildx inspect --bootstrap
- #+# docker buildx inspect --bootstrap
+ docker buildx inspect --bootstrap
+ docker buildx inspect --bootstrap
 
 #docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
-#+#docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
+docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
 
 if [ "$DEBUG2" = "true" ]; then
