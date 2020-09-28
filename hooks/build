@@ -52,7 +52,7 @@ curl -SLOR https://gist.github.com/MaxPeal/53216500768d29c37f6fc84ff68f916e/raw/
 chmod 755 *.sh
 #+# ./reregister-qemu-binfmt.sh
 #+# ./multi-arch-docker-ci.sh
-./check-qemu-binfmt.sh
+#+# bbb./check-qemu-binfmt.sh
 echo "##################################################""##################################################""##################################################""##################################################"
 
 echo "##################################################""##################################################""##################################################""##################################################"
@@ -150,7 +150,8 @@ if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
 #+#    docker buildx rm $line
 #+#  done
   
-  docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  #+# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  docker run --privileged --rm tonistiigi/binfmt --install all
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
@@ -257,7 +258,7 @@ fi
 ####EOF
 
 #DEBUG4=true
-QUICKBUILD=true
+###QUICKBUILD=true
 
 if [ "$DEBUG4" != "true" ]; then
 #iidfile=$(mktemp -t docker-iidfile.XXXXXXXXXX)
