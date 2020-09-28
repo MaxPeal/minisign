@@ -151,7 +151,10 @@ if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
 #+#  done
   
   #+# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  docker run --privileged --rm tonistiigi/binfmt --install all
+  # see https://github.com/multiarch/qemu-user-static/issues/38
+  # see https://github.com/multiarch/qemu-user-static/issues/100
+  docker run --rm --privileged multiarch/qemu-user-static --reset
+  #+# docker run --privileged --rm tonistiigi/binfmt --install all
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
