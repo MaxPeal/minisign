@@ -46,9 +46,9 @@ curl -SLOR https://gist.github.com/MaxPeal/43537c45b148e8a75af87cd4233e513a/raw/
 curl -SLOR https://gist.github.com/MaxPeal/790ceecece5f6e6c68d0ed647b5c51d3/raw/d53ed4e5bef6b62ba258a79f2984b9a3a7d78265/multi-arch-docker-ci.sh
 curl -SLOR https://gist.github.com/MaxPeal/53216500768d29c37f6fc84ff68f916e/raw/eddd834659bc6893a37d865d3cc2df8ca2192d7c/reregister-qemu-binfmt.sh
 chmod 755 *.sh
-reregister-qemu-binfmt.sh
-multi-arch-docker-ci.sh
-check-qemu-binfmt.sh
+./reregister-qemu-binfmt.sh
+./multi-arch-docker-ci.sh
+./bbcheck-qemu-binfmt.sh
 echo "##################################################""##################################################""##################################################""##################################################"
 
 echo "##################################################""##################################################""##################################################""##################################################"
