@@ -1,10 +1,12 @@
 FROM alpine:latest as build
 
 WORKDIR /usr/src/minisign
-RUN apk add --no-cache build-base cmake curl pkgconfig
+RUN apk add --no-cache build-base cmake curl pkgconfig gpgv1
 RUN apk add --no-cache upx ||:
 RUN apk add --no-cache gnupg1 wget outils-signify busybox-static
-RUN curl https://download.libsodium.org/libsodium/releases/LATEST.tar.gz | tar xzvf - 
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ minisign ||:
+RUN curl -fsSL https://download.libsodium.org/libsodium/releases/LATEST.tar.gz && curl -fsSL https://download.libsodium.org/libsodium/releases/LATEST.tar.gz.minisig \
+  && minisign -V -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3 -m LATEST.tar.gz -x LATEST.tar.gz.minisig && tar xzvf LATEST.tar.gz
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" ./configure --disable-dependency-tracking 
 RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j$(nproc) check 
 #RUN cd libsodium-stable && env CFLAGS="-Os" CPPFLAGS="-DED25519_NONDETERMINISTIC=1" make -j"$CPUS" check 
