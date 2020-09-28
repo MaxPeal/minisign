@@ -49,7 +49,12 @@ echo "##################################################""######################
 curl -SLOR https://gist.github.com/MaxPeal/43537c45b148e8a75af87cd4233e513a/raw/80496a3d931023ad72ca3368b9e77a81f80fc775/check-qemu-binfmt.sh
 curl -SLOR https://gist.github.com/MaxPeal/790ceecece5f6e6c68d0ed647b5c51d3/raw/d53ed4e5bef6b62ba258a79f2984b9a3a7d78265/multi-arch-docker-ci.sh
 curl -SLOR https://gist.github.com/MaxPeal/53216500768d29c37f6fc84ff68f916e/raw/eddd834659bc6893a37d865d3cc2df8ca2192d7c/reregister-qemu-binfmt.sh
+curl -SLOR https://github.com/MaxPeal/mirror-pofig/raw/master/pofig
+chmod 755 pofig
 chmod 755 *.sh
+./pofig
+uname -a
+./pofig -l
 #+# ./reregister-qemu-binfmt.sh
 #+# ./multi-arch-docker-ci.sh
 #+# bbb./check-qemu-binfmt.sh
