@@ -39,6 +39,9 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 #sudo apt-get install qemu-user-static
 
 
+echo "lsb_release -a"
+lsb_release -a
+
 echo "##################################################"
 #set
 #env
