@@ -1,7 +1,7 @@
 #!/bin/bash
 set -vx
 export DEBUG=true
-#bbexport DEBUG2=true
+#export DEBUG2=true
 #export DEBUG3=true
 #export DEBUG4=true
 #export DEBUG5=true
@@ -142,24 +142,27 @@ if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
   docker --help || docker -h
   docker version
   docker info
+  docker buildx version
  
  docker buildx ls
- docker buildx ls | cut -d" " -f1 | grep -v "/" | \
- while read -r line; do
-   docker buildx rm $line
- done
+ #+# docker buildx ls | cut -d" " -f1 | grep -v "/" | \
+ #+# while read -r line; do
+#+#    docker buildx rm $line
+#+#  done
   
-  ### docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
  #FIXME
- docker buildx create --name mybuilder --driver docker-container --use
+ #+# docker buildx create --name mybuilder --driver docker-container --use
+ docker buildx create --name mybuilder --use
  docker buildx use mybuilder
   # Start up buildx and verify that all is OK.
   # duble as it needs some times duble exec
  docker buildx inspect --bootstrap
  docker buildx inspect --bootstrap
+ docker buildx ls
 
 #docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "[:space:]"
 docker buildx inspect --bootstrap | grep -i Platforms | cut -d":" -f2 | tr -d "^[:blank:]" | tr "," "\\n"
