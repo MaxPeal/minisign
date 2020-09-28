@@ -46,7 +46,9 @@ jobs:
           #DOCKER_IMAGE=name/app
           #DOCKER_IMAGE=maxpeal/minisign-ci
           #DOCKER_IMAGE=${{ github.repository_owner }}/${{ github.event.repository.name }}
-          DOCKER_IMAGE=${{env.REPOSITORY_LOWER}}/ci
+          #DOCKER_IMAGE=${{env.REPOSITORY_LOWER}}/ci
+          DOCKER_IMAGE=docker.io/${{env.REPOSITORY_LOWER}}/ci
+          ###Pushing index.docker.io/maxpeal/minisign:ci-test-script-2...
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly
@@ -88,6 +90,9 @@ jobs:
       -
         name: Available buildx.outputs.platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
+      -
+        name: echo steps.prep.outputs.tags
+        run: echo ${{ steps.prep.outputs.tags }}
       -
         name: Available qemu.outputs.platforms 
         run: echo ${{ steps.qemu.outputs.platforms }}
