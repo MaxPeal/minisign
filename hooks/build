@@ -1,6 +1,11 @@
 #!/bin/bash
 set -vx
 
+# https://github.com/docker/buildx/issues/243
+#+++ export DOCKER_CLI_EXPERIMENTAL=enabled
+#+++ export DOCKER_BUILDKIT=1
+# MUST BE SET VIA WEBGUI!
+
 ###export QUICKBUILD=true
 export CONTINUOUS_INTEGRATION=true
 
@@ -16,8 +21,6 @@ DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
 docker info
 
 echo "##################################################"
-set
-env
 echo "##################################################"
 
 
