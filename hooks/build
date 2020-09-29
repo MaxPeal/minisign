@@ -13,6 +13,7 @@ if [ "$CONTINUOUS_INTEGRATION" = "true" ]; then progressFlag="--progress=plain";
 QEMUVER=$(echo "$DOCKER_TAG")
 DockerServerVersion=$(docker info --format '{{.ServerVersion}}')
 DockerSxperimental=$(docker info --format '{{.ExperimentalBuild}}')
+docker info
 
 echo "##################################################"
 set
@@ -65,10 +66,10 @@ printf "HFILE=$HFILE HDIR=$HDIR HASHcmd=$HASHcmd HASHSUM=$HASHSUM HURL=$HURL"
 ####mv "${THFILE}" "${HDIR}"/"${HFILE}"
 ####chmod 755 "${HDIR}"/"${HFILE}"
 
-( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
-mkdir -p "${HDIR}"
-mv "${HFILE}" "${HDIR}"/"${HFILE}"
-chmod 755 "${HDIR}"/"${HFILE}"
+#+#+#+# ( (cd $HDIR && printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c -) && printf %b "SKIP DOWNLOAD\\040\\012" ) || curl -o $HFILE -LR -f -S --connect-timeout 15 --max-time 600 --retry 3 --dump-header - --compressed --verbose $HURL ; (printf %b CHECKSUM\\072\\040expect\\040this\\040$HASHcmd\\072\\040$HASHSUM\\040\\052$HFILE\\012 ; printf %b $HASHSUM\\040\\052$HFILE\\012 | $HASHcmd -c - ;) || (printf %b ERROR\\072\\040CHECKSUMFAILD\\072\\040the\\040file\\040has\\040this\\040$HASHcmd\\072\\040 ; $HASHcmd -b $HFILE ; exit 1)
+#+#+#+# mkdir -p "${HDIR}"
+#+#+#+# mv "${HFILE}" "${HDIR}"/"${HFILE}"
+#+#+#+# chmod 755 "${HDIR}"/"${HFILE}"
 
 #curl -o $HFILE -LR -C- -# -f -S --connect-timeout 15 --max-time 600 --retry 3 --retry-connrefused --dump-header --verbose https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
 # curl: option --retry-connrefused: is unknown
@@ -103,12 +104,29 @@ if [ "$DEBUG" = "true" ]; then docker --help || docker -h ; fi
    docker buildx rm $line
   done
   
+#+++ export DOCKER_CLI_EXPERIMENTAL=enabled
+#+++ export DOCKER_BUILDKIT=1
+#+++ docker buildx create \
+#+++ 	--name builder \
+#+++ 	--driver docker-container \
+#+++ 	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
+#+++ 	--use
+#+++ docker buildx inspect --bootstrap
+
+#+++ export DOCKER_CLI_EXPERIMENTAL=enabled
+#+++ export DOCKER_BUILDKIT=1
+#+++ echo "Using BUILD_INFO=${BUILD_INFO}"
+#+++ docker buildx build \
+#+++ 	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
+#+++ 	--progress plain --load \
+#+++ 	-f $DOCKERFILE_PATH -t $IMAGE_NAME .
+
   ### docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   
   #docker buildx create --name mybuilder
   # https://www.padok.fr/en/blog/multi-architectures-docker-iot
   docker buildx create --name mybuilder --driver docker-container --use
-  docker buildx use mybuilder
+  #+# docker buildx use mybuilder
   # Start up buildx and verify that all is OK.
   # duble as it needs some times duble exec
   docker buildx inspect --bootstrap
